@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from logging import getLogger
-from typing import TYPE_CHECKING, Any, Dict, List, Protocol, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Protocol, TypedDict, Union
 
 from smolagents.models import ChatMessage, MessageRole
 from smolagents.monitoring import AgentLogger, LogLevel
@@ -52,12 +52,12 @@ class MemoryStep(ABC):
         return asdict(self)
 
     @abstractmethod
-    def to_messages(self, **kwargs) -> List[Dict[str, Any]]:
+    def to_messages(self, **kwargs) -> list[dict[str, Any]]:
         """
         Convert the memory step to a list of messages that can be used as input to the LLM.
 
         Returns:
-            List[Dict[str, Any]]: A list of messages.
+            list[dict[str, Any]]: A list of messages.
         """
         raise NotImplementedError
 
@@ -70,8 +70,8 @@ class ActionStep(MemoryStep):
     This includes the model's input and output, tool calls, observations, and any errors.
     """
 
-    model_input_messages: List[Message] | None = None
-    tool_calls: List[ToolCall] | None = None
+    model_input_messages: list[Message] | None = None
+    tool_calls: list[ToolCall] | None = None
     start_time: float | None = None
     end_time: float | None = None
     step_number: int | None = None
@@ -80,7 +80,7 @@ class ActionStep(MemoryStep):
     model_output_message: ChatMessage = None
     model_output: str | None = None
     observations: str | None = None
-    observations_images: List[str] | None = None
+    observations_images: list[str] | None = None
     action_output: Any = None
 
     def dict(self):
@@ -99,7 +99,7 @@ class ActionStep(MemoryStep):
             "action_output": make_json_serializable(self.action_output),
         }
 
-    def to_messages(self, summary_mode: bool = False, show_model_input_messages: bool = False) -> List[Message]:
+    def to_messages(self, summary_mode: bool = False, show_model_input_messages: bool = False) -> list[Message]:
         messages = []
         if self.model_input_messages is not None and show_model_input_messages:
             messages.append(Message(role=MessageRole.SYSTEM, content=self.model_input_messages))
@@ -171,13 +171,13 @@ class PlanningStep(MemoryStep):
     This includes the model's input and output for facts and plan generation.
     """
 
-    model_input_messages: List[Message]
+    model_input_messages: list[Message]
     model_output_message_facts: ChatMessage
     facts: str
     model_output_message_plan: ChatMessage
     plan: str
 
-    def to_messages(self, summary_mode: bool, **kwargs) -> List[Message]:
+    def to_messages(self, summary_mode: bool, **kwargs) -> list[Message]:
         messages = []
         messages.append(
             Message(
@@ -203,9 +203,9 @@ class TaskStep(MemoryStep):
     """
 
     task: str
-    task_images: List[str] | None = None
+    task_images: list[str] | None = None
 
-    def to_messages(self, summary_mode: bool = False, **kwargs) -> List[Message]:
+    def to_messages(self, summary_mode: bool = False, **kwargs) -> list[Message]:
         content = [{"type": "text", "text": f"New task:\n{self.task}"}]
         if self.task_images:
             for image in self.task_images:
@@ -222,7 +222,7 @@ class SystemPromptStep(MemoryStep):
 
     system_prompt: str
 
-    def to_messages(self, summary_mode: bool = False, **kwargs) -> List[Message]:
+    def to_messages(self, summary_mode: bool = False, **kwargs) -> list[Message]:
         if summary_mode:
             return []
         return [Message(role=MessageRole.SYSTEM, content=[{"type": "text", "text": self.system_prompt}])]
@@ -251,7 +251,7 @@ class MemoryProvider(Protocol):
         """Replay the memory steps."""
         ...
 
-    def write_to_messages(self, summary_mode: bool = False) -> List[Dict[str, Any]]:
+    def write_to_messages(self, summary_mode: bool = False) -> list[dict[str, Any]]:
         """Convert the memory steps to a list of messages."""
         ...
 
@@ -265,7 +265,7 @@ class AgentMemory:
 
     def __init__(self, system_prompt: str):
         self.system_prompt = SystemPromptStep(system_prompt=system_prompt)
-        self.steps: List[Union[TaskStep, ActionStep, PlanningStep]] = []
+        self.steps: list[Union[TaskStep, ActionStep, PlanningStep]] = []
 
     def reset(self):
         """Reset the memory by clearing all steps."""
@@ -319,7 +319,7 @@ class AgentMemory:
                     logger.log_messages(step.model_input_messages, level=LogLevel.ERROR)
                 logger.log_markdown(title="Agent output:", content=step.facts + "\n" + step.plan, level=LogLevel.ERROR)
 
-    def write_to_messages(self, summary_mode: bool = False) -> List[Dict[str, Any]]:
+    def write_to_messages(self, summary_mode: bool = False) -> list[dict[str, Any]]:
         """
         Convert the memory steps to a list of messages.
 
@@ -327,7 +327,7 @@ class AgentMemory:
             summary_mode (bool, optional): If True, exclude certain details to create a summary. Defaults to False.
 
         Returns:
-            List[Dict[str, Any]]: A list of messages.
+            list[dict[str, Any]]: A list of messages.
         """
         messages = self.system_prompt.to_messages(summary_mode=summary_mode)
         for memory_step in self.steps:
