@@ -20,7 +20,7 @@ class MockModel:
         self.model_id = "MockModel"
         self.step_count = 0
 
-    def __call__(self, messages, **kwargs):
+    def generate(self, messages, **kwargs):
         # Return different responses based on step count to simulate a conversation
         self.step_count += 1
 
