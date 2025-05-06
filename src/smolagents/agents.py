@@ -237,7 +237,7 @@ class MultiStepAgent(ABC):
 
         self.system_prompt = self.initialize_system_prompt()
         self.task: str | None = None
-        self.memory = AgentMemory(self.system_prompt)
+        self.memory: MemoryProvider = AgentMemory(self.system_prompt)
 
         if logger is None:
             self.logger = AgentLogger(level=verbosity_level)
@@ -536,10 +536,7 @@ You have been provided with these additional arguments, that you can access usin
         that can be used as input to the LLM. Adds a number of keywords (such as PLAN, error, etc) to help
         the LLM.
         """
-        messages = self.memory.system_prompt.to_messages(summary_mode=summary_mode)
-        for memory_step in self.memory.steps:
-            messages.extend(memory_step.to_messages(summary_mode=summary_mode))
-        return messages
+        return self.memory.write_to_messages(summary_mode=summary_mode)
 
     def _step_stream(self, memory_step: ActionStep) -> Generator[Any]:
         """

@@ -18,6 +18,8 @@
     title: 🛡️ Secure code execution
   - local: tutorials/memory
     title: 📚 Manage your agent's memory
+  - local: tutorials/memory_providers
+    title: 🔌 Using different memory providers
 - title: Conceptual guides
   sections:
   - local: conceptual_guides/intro_agents
