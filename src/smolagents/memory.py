@@ -221,6 +221,9 @@ class SystemPromptStep(MemoryStep):
 class FinalAnswerStep(MemoryStep):
     final_answer: Any
 
+    def to_messages(self, summary_mode: bool = False) -> list[Message]:
+        return [Message(role=MessageRole.TOOL_RESPONSE, content=[{"type": "text", "text": self.final_answer}])]
+
 
 class MemoryProvider(Protocol):
     """
