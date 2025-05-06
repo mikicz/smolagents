@@ -112,11 +112,7 @@ class ActionStep(MemoryStep):
                 Message(
                     role=MessageRole.TOOL_CALL,
                     content=[
-                        {
-                            "type": "text",
-                            "text": "Calling tools:\n"
-                            + str([tc.dict() if not isinstance(tc, dict) else tc for tc in self.tool_calls]),
-                        }
+                        {"type": "text", "text": "Calling tools:\n" + str([tc.dict() for tc in self.tool_calls])}
                     ],
                 )
             )
