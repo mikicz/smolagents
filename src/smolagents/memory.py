@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
 from logging import getLogger
-from typing import TYPE_CHECKING, Any, Protocol, TypedDict, Union
+from typing import TYPE_CHECKING, Any, Protocol, TypedDict
 
 from smolagents.models import ChatMessage, MessageRole
 from smolagents.monitoring import AgentLogger, LogLevel
@@ -114,7 +114,8 @@ class ActionStep(MemoryStep):
                     content=[
                         {
                             "type": "text",
-                            "text": "Calling tools:\n" + str([tc.dict() for tc in self.tool_calls]),
+                            "text": "Calling tools:\n"
+                            + str([tc.dict() if not isinstance(tc, dict) else tc for tc in self.tool_calls]),
                         }
                     ],
                 )
@@ -253,7 +254,6 @@ class MemoryProvider(Protocol):
         ...
 
 
-
 class AgentMemory:
     """
     Default implementation of agent memory.
@@ -317,7 +317,6 @@ class AgentMemory:
                 if detailed and step.model_input_messages is not None:
                     logger.log_messages(step.model_input_messages, level=LogLevel.ERROR)
                 logger.log_markdown(title="Agent output:", content=step.plan, level=LogLevel.ERROR)
-
 
     def write_to_messages(self, summary_mode: bool = False) -> list[dict[str, Any]]:
         """
