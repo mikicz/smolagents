@@ -229,6 +229,10 @@ class MemoryProvider(Protocol):
     Memory providers are responsible for storing and retrieving memory steps.
     """
 
+    @property
+    def steps(self) -> list[TaskStep | ActionStep | PlanningStep]:
+        ...
+
     def reset(self) -> None:
         """Reset the memory."""
         ...
@@ -340,4 +344,5 @@ __all__ = [
     "SystemPromptStep",
     "ToolCall",
     "Message",
+    "MemoryProvider",
 ]
