@@ -18,6 +18,7 @@ from smolagents.memory import (
     PlanningStep,
     SystemPromptStep,
     TaskStep,
+    ToolCall,
 )
 from smolagents.monitoring import AgentLogger, LogLevel
 from smolagents.utils import make_json_serializable
@@ -339,14 +340,15 @@ class ExternalStorageMemory:
                     # Handle the case where 'step' is used instead of 'step_number'
                     if "step" in step_dict and "step_number" not in step_dict:
                         step_dict["step_number"] = step_dict.pop("step")
-                    # if "tool_calls" in step_dict and step_dict["tool_calls"]:
-                    #     step_dict["tool_calls"] = [
-                    #         ToolCall(
-                    #             name=tool_call["function"]["name"],
-                    #             arguments=tool_call["function"]["arguments"],
-                    #             id=tool_call["id"],
-                    #         ) for tool_call in step_dict["tool_calls"]
-                    #     ]
+                    if "tool_calls" in step_dict and step_dict["tool_calls"]:
+                        step_dict["tool_calls"] = [
+                            ToolCall(
+                                name=tool_call["function"]["name"],
+                                arguments=tool_call["function"]["arguments"],
+                                id=tool_call["id"],
+                            )
+                            for tool_call in step_dict["tool_calls"]
+                        ]
                     return ActionStep(**step_dict)
                 elif "facts" in step_dict and "plan" in step_dict:
                     return PlanningStep(**step_dict)
